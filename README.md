@@ -1,2 +1,0 @@
-# TrainNeuralNetwork
-Train Neural Network
