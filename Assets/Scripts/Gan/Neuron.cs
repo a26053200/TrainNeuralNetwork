@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using NeuralNetwork;
 
-namespace Gen
+namespace Gan
 {
     /// <summary>
     /// 神经元

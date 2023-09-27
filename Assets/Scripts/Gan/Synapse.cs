@@ -7,7 +7,7 @@
 using System;
 using NeuralNetwork;
 
-namespace Gen
+namespace Gan
 {
     /// <summary>
     /// 突触
