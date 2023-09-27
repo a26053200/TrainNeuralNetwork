@@ -7,3 +7,4 @@ Logs/    # 忽略目录下的所有文件
 obj/    # 忽略目录下的所有文件
 UserSetting/    # 忽略目录下的所有文件
  
+*.csproj
