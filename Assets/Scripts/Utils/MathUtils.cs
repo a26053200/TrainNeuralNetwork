@@ -21,5 +21,10 @@ namespace NeuralNetwork
         {
             return 2 * SRandom.NextDouble() - 1;
         }
+        
+        public static double GetRandomRange()
+        {
+            return SRandom.NextDouble();
+        }
     }
 }

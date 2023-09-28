@@ -132,7 +132,7 @@ namespace Example_1
 
         #endregion
 
-        private double[] Compute(double[] inputs)
+        public double[] Compute(double[] inputs)
         {
             ForwardPropagate(inputs);
             return OutputLayer.Select(a => a.Value).ToArray();

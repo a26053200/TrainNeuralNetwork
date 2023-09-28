@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NeuralNetwork;
 
 namespace Gan
@@ -20,10 +21,10 @@ namespace Gan
         public Guid Id { get; set; } // 神经元ID
         public List<Synapse> InputSynapses { get; set; } // 连接输入端的突触
         public List<Synapse> OutputSynapses { get; set; } // 连接输出端的突触
-        public double Bias { get; set; }
+        public double Bias { get; set; } //偏差
         public double BiasDelta { get; set; } // 偏差值     
         public double Gradient { get; set; } // 梯度值 
-        public double Value { get;  set; } // 神经元的输入值
+        public double Value { get; set; } // 神经元的输入值
         public bool IsMirror { get; set; } // 镜像神经元标志(后面几章学)
         public bool IsCanonical { get; set; } // 典型神经元标志 (后面几章学)
 
@@ -36,21 +37,22 @@ namespace Gan
             OutputSynapses = new List<Synapse>();
             Bias = MathUtils.GetRandom();
         }
-        
-        public Neuron(IEnumerable<Neuron> inputNeurons):this()
+
+        public Neuron(IEnumerable<Neuron> inputNeurons) : this()
         {
             foreach (var inputNeuron in inputNeurons)
             {
-                var synapse = new Synapse(inputNeuron,this);
+                var synapse = new Synapse(inputNeuron, this);
                 inputNeuron.OutputSynapses.Add(synapse);
                 InputSynapses.Add(synapse);
             }
         }
-        
+
         //计算神经元的值
         public virtual double CalculateValue()
         {
-            return Value = Sigmoid.Output(SumInput() + Bias);
+            var x = InputSynapses.Sum(a => a.Weight* a.InputNeuron.Value) + Bias;
+            return Value = Sigmoid.Output(x);
         }
 
         //计算梯度
@@ -81,7 +83,7 @@ namespace Gan
             foreach (var synapse in InputSynapses)
             {
                 prevDelta = synapse.WeightDelta;
-                synapse.WeightDelta = learnRate * Gradient * synapse.InputNeuron.Value; //权重李化量
+                synapse.WeightDelta = learnRate * Gradient * synapse.InputNeuron.Value; //权重化量
                 synapse.Weight += synapse.WeightDelta + momentum * prevDelta; // 更新权重
             }
         }

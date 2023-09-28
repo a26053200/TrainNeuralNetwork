@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Gan
 {
@@ -20,21 +21,25 @@ namespace Gan
         public List<Neuron> MirrorLayer { get; set; } // 镜像层
         public List<Neuron> CanonicalLayer { get; set; } // 典型层
 
-        public Network(int numInputParameters, int[] hiddenNeurons, int numOutputParameters)
+        public Network()
         {
             InputLayer = new List<Neuron>();
+            OutputLayer = new List<Neuron>();
+            HiddenLayers = new List<List<Neuron>>();
+        }
+
+        public Network(int numInputParameters, int[] hiddenNeurons, int numOutputParameters):this()
+        {
             for (int i = 0; i < numInputParameters; i++)
             {
                 InputLayer.Add(new Neuron());
             }
             
-            OutputLayer = new List<Neuron>();
             for (int i = 0; i < numOutputParameters; i++)
             {
                 OutputLayer.Add(new Neuron(InputLayer));
             }
 
-            HiddenLayers = new List<List<Neuron>>();
             for (int i = 0; i < hiddenNeurons.Length; i++)
             {
                 var list = new List<Neuron>();
@@ -55,13 +60,14 @@ namespace Gan
         private void ForwardPropagate(params double[] inputs) // params关键字 -- 可变参数
         {
             var i = 0;
-            InputLayer?.ForEach(a => a.Value = inputs[i++]);
             // 遍历输入层的神经元的值
-            HiddenLayers?.ForEach(a => a.ForEach(b => b.CalculateValue()));
+            InputLayer?.ForEach(a => a.Value = inputs[i++]);
             // 隐藏层是嵌套list，所以要遍历两次
-            OutputLayer?.ForEach(a => a.CalculateValue());
+            HiddenLayers?.ForEach(a => a.ForEach(b => b.CalculateValue()));
             // 遍历并计算输出层的值
-            // 自学者注:先前传播就是对每个突触的所有值求和，通过sigmoid函数得到运行结果以输出// 补充基础知识:?是Nu11检查运算符，先检查Inputlaver等是否为空集。
+            OutputLayer?.ForEach(a => a.CalculateValue());
+            // 自学者注:先前传播就是对每个突触的所有值求和，通过sigmoid函数得到运行结果以输出
+            // 补充基础知识:?是Nu11检查运算符，先检查Inputlaver等是否为空集。
         }
 
         ///<summary>
@@ -71,15 +77,16 @@ namespace Gan
         private void BackPropagate(params double[] targets)
         {
             var i = 0;
-            OutputLayer?.ForEach(a => a.CalculateGradient(targets[i++]));
             //从后往前，先遍历输出层
+            OutputLayer?.ForEach(a => a.CalculateGradient(targets[i++]));
             HiddenLayers?.Reverse(); // 排序后反转
-            HiddenLayers?.ForEach(a => a.ForEach(b => b.CalculateGradient()));
             // 隐藏层，计算梯度下降
+            HiddenLayers?.ForEach(a => a.ForEach(b => b.CalculateGradient()));
+            // 更新隐藏层权重
             HiddenLayers?.ForEach(a => a.ForEach(b => b.UpdateWeights(LearningRate, Momentum)));
-            // 更新隐藏层权
             HiddenLayers?.Reverse(); // 排序后反转
-            OutputLayer?.ForEach(a => a.UpdateWeights(LearningRate, Momentum)); // 更新输出层权重
+            // 更新输出层权重
+            OutputLayer?.ForEach(a => a.UpdateWeights(LearningRate, Momentum));
         }
 
         #endregion
@@ -108,15 +115,15 @@ namespace Gan
         /// </summary>
         /// <param name="dataSet">数据集</param>
         /// <param name="minError">最小误差</param>
-        public void Train(List<NNDataSet> dataSet, double minError)
+        public void Train(List<NNDataSet> dataSet, double minError, int maxNumEpochs)
         {
             var error = 1.0;
-            var numEpochs = 0;
-// 训练至误差小于最小误差，且周期不超过int的最大范围
-            while (error > minError && numEpochs < int.MaxValue)
+            var numEpochs = 0; 
+            // 训练至误差小于最小误差，且周期不超过int的最大范围
+            while (error > minError && numEpochs < short.MaxValue)
             {
                 var errors = new List<double>();
-// 遍历数据集，进行一轮的前向&后向传播
+                // 遍历数据集，进行一轮的前向&后向传播
                 foreach (var data in dataSet)
                 {
                     ForwardPropagate(data.Values);
@@ -126,13 +133,14 @@ namespace Gan
 
                 error = errors.Average(); // 求误差均值
                 numEpochs++; // 时期递增
-// 循环往复
             }
+            Debug.Log("min error num:" + numEpochs);
+            // 循环往复
         }
 
         #endregion
 
-        private double[] Compute(double[] inputs)
+        public double[] Compute(double[] inputs)
         {
             ForwardPropagate(inputs);
             return OutputLayer.Select(a => a.Value).ToArray();
