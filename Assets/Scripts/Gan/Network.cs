@@ -28,13 +28,13 @@ namespace Gan
             HiddenLayers = new List<List<Neuron>>();
         }
 
-        public Network(int numInputParameters, int[] hiddenNeurons, int numOutputParameters):this()
+        public Network(int numInputParameters, int[] hiddenNeurons, int numOutputParameters) : this()
         {
             for (int i = 0; i < numInputParameters; i++)
             {
                 InputLayer.Add(new Neuron());
             }
-            
+
             for (int i = 0; i < numOutputParameters; i++)
             {
                 OutputLayer.Add(new Neuron(InputLayer));
@@ -110,17 +110,18 @@ namespace Gan
                 }
         }
 
-        ///<summary>
-        /// 规定最小误差的训练函数(方法重载)
-        /// </summary>
-        /// <param name="dataSet">数据集</param>
-        /// <param name="minError">最小误差</param>
+        /// <summary>
+        ///  规定最小误差的训练函数(方法重载)
+        ///  </summary>
+        ///  <param name="dataSet">数据集</param>
+        ///  <param name="minError">最小误差</param>
+        /// <param name="maxNumEpochs">最大迭代次数(防止卡死)</param>
         public void Train(List<NNDataSet> dataSet, double minError, int maxNumEpochs)
         {
             var error = 1.0;
-            var numEpochs = 0; 
+            var numEpochs = 0;
             // 训练至误差小于最小误差，且周期不超过int的最大范围
-            while (error > minError && numEpochs < short.MaxValue)
+            while (error > minError && numEpochs < maxNumEpochs)
             {
                 var errors = new List<double>();
                 // 遍历数据集，进行一轮的前向&后向传播
@@ -134,6 +135,7 @@ namespace Gan
                 error = errors.Average(); // 求误差均值
                 numEpochs++; // 时期递增
             }
+
             Debug.Log("min error num:" + numEpochs);
             // 循环往复
         }

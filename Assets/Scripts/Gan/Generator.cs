@@ -27,7 +27,7 @@ namespace Gan
             };
             InputLayer.Add(inputNeuron);
 
-            //4个输出元 每个输出有4个输入突触
+            //4个输出元 每个输出有1个输入突触
             double[] biases = {1, -1, -1, 1};
             for (int i = 0; i < biases.Length; i++)
             {

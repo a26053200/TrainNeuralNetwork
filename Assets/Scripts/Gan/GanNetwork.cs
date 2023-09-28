@@ -41,11 +41,11 @@ namespace Gan
             //对抗网络 判别器
             //4个输入元,每个元 1个突触 到 同 1个输出
             _discriminator = new Discriminator();
-            
+
             //对抗网络 生成器
             //4个输入元,每个元 1个突触 到 同 1个输出
             _generator = new Generator();
-            
+
             //测试判别器
             for (int i = 0; i < targetList.Count; i++)
             {
@@ -61,50 +61,60 @@ namespace Gan
             if (Time.time - _startTime < 1)
                 return;
             _startTime = Time.time;
-            
+
             //生成器生成一组数据
-            // var inputs = new[] {MathUtils.GetRandomRange()};
+            var inputs = new[] {MathUtils.GetRandomRange()};
             // var inputs = new[] {0.7};
             // _debugData1(inputs);
-            // var results = _generator.Compute(inputs);
-            // _debugData2(results);
-            
+            var results1 = _generator.Compute(inputs);
+            var results2 = _discriminator.Compute(results1);
+            if (results2.Length > 0 && results2[0] >= 0.5)
+            {
+                _debugData2(results1);
+                _debugData3(results2);
+            }
+            else
+            {
+                //判别失败
+                _debugError(results1);
+                _debugError(results2);
+            }
+        }
+
+        private void DoubleArray2String(double[] values)
+        {
+            _stringBuilder.Clear();
+            foreach (var t in values)
+            {
+                _stringBuilder.Append(t);
+                _stringBuilder.Append(',');
+            }
         }
 
         private void _debugData1(double[] values)
         {
-            _stringBuilder.Clear();
-            foreach (var t in values)
-            {
-                _stringBuilder.Append(t);
-                _stringBuilder.Append(',');
-            }
-
+            DoubleArray2String(values);
             Debug.Log($"<color=#FFFFFFFF>{_stringBuilder.ToString()}</color>");
         }
-        
+
         private void _debugData2(double[] values)
         {
-            _stringBuilder.Clear();
-            foreach (var t in values)
-            {
-                _stringBuilder.Append(t);
-                _stringBuilder.Append(',');
-            }
+            DoubleArray2String(values);
 
             Debug.Log($"<color=#FFFF00FF>{_stringBuilder.ToString()}</color>");
         }
-        
+
         private void _debugData3(double[] values)
         {
-            _stringBuilder.Clear();
-            foreach (var t in values)
-            {
-                _stringBuilder.Append(t);
-                _stringBuilder.Append(',');
-            }
+            DoubleArray2String(values);
 
             Debug.Log($"<color=#FF00FFFF>{_stringBuilder.ToString()}</color>");
+        }
+
+        private void _debugError(double[] values)
+        {
+            DoubleArray2String(values);
+            Debug.LogError($"<color=#FF00FFFF>{_stringBuilder.ToString()}</color>");
         }
     }
 }
