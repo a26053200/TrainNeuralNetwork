@@ -40,10 +40,8 @@ namespace Gan
         public void Update(double[] noises, Discriminator D)
         {
             // var error_before = Error(noises, D);
-            ForwardPropagate(noises);
-            var x = OutputLayer.Select(a => a.Value).ToArray();
-            D.ForwardPropagate(x);
-            var y = D.OutputLayer.Select(a => a.Value).ToArray();
+            var x = Forward(noises);
+            var y = D.Forward(x);
             var dw = D.GetOutputWeights(0);
             var db = D.GetOutputBiases()[0];
             var factor = new double[dw.Length];

@@ -57,7 +57,7 @@ namespace Gan
         /// 前向传播
         ///</summary>
         ///<param name="inputs"></param>
-        public void ForwardPropagate(params double[] inputs) // params关键字 -- 可变参数
+        private void ForwardPropagate(params double[] inputs) // params关键字 -- 可变参数
         {
             var i = 0;
             // 遍历输入层的神经元的值
@@ -74,7 +74,7 @@ namespace Gan
         /// 向后传播
         ///</summary>
         ///<param name="targets"></param>2个引用
-        protected void BackPropagate(params double[] targets)
+        private void BackPropagate(params double[] targets)
         {
             var i = 0;
             //从后往前，先遍历输出层
@@ -175,7 +175,7 @@ namespace Gan
 
         #endregion
 
-        public double[] Compute(double[] inputs)
+        public double[] Forward(double[] inputs)
         {
             ForwardPropagate(inputs);
             return OutputLayer.Select(a => a.Value).ToArray();
@@ -185,8 +185,7 @@ namespace Gan
         //从真实数据计算误差
         public double[] CalculateErrorFromTargets(double[] targets)
         {
-            ForwardPropagate(targets);
-            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            var predictions = Forward(targets);
             double[] errors = new double[predictions.Length];
             for (int i = 0; i < predictions.Length; i++)
                 errors[i] = -Math.Log(predictions[i]);
@@ -197,8 +196,7 @@ namespace Gan
         //从噪声数据计算误差
         public double[] CalculateErrorFromNoises(double[] noises)
         {
-            ForwardPropagate(noises);
-            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            var predictions = Forward(noises);
             double[] errors = new double[predictions.Length];
             for (int i = 0; i < predictions.Length; i++)
                 errors[i] = -Math.Log(1 - predictions[i]);
@@ -208,10 +206,8 @@ namespace Gan
 
         public double Error(double[] noises, Network D)
         {
-            ForwardPropagate(noises);
-            var x = OutputLayer.Select(a => a.Value).ToArray();
-            D.ForwardPropagate(x);
-            var y = D.OutputLayer.Select(a => a.Value).ToArray();
+            var x = Forward(noises);;
+            var y = D.Forward(x);
             return -Math.Log(y[0]);
         }
 

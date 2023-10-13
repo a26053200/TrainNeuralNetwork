@@ -112,7 +112,7 @@ namespace Gan
                     var gError = _generator.Error(z, _discriminator);
 
                     //生成器 根据噪声 生成人脸
-                    var noiseFace = _generator.Compute(z);
+                    var noiseFace = _generator.Forward(z);
                     //从假脸更新判别器权重
                     _discriminator.UpdateWeightsFromNoises(noiseFace);
                     //从假脸更新生成器权重
@@ -146,16 +146,21 @@ namespace Gan
             Debug.Log("G weights:\t" + DebugUtils.DoubleArray2String(_generator.GetInputWeights(0)));
             Debug.Log("G biases:\t" + DebugUtils.DoubleArray2String(_generator.GetOutputBiases()));
             Debug.Log("D weights:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputWeights(0)));
-            Debug.Log("D biases:\t" + DebugUtils.DoubleArray2String(_discriminator.GetInputBiases()));
+            Debug.Log("D biases:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputBiases()));
             //测试生成器 判别器
-            var testFaces = new List<double[]>();
-            for (int i = 0; i < 10; i++)
+            // for (int i = 0; i < 10; i++)
+            // {
+            //     var z = new[] {MathUtils.GetRandomRange()};
+            //     var face = _generator.Forward(z);
+            //     var results = _discriminator.Forward(face);
+            //     Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
+            // }
+            
+            //测试判别器
+            foreach (var target in targetList)
             {
-                var z = new[] {MathUtils.GetRandomRange()};
-                var face = _generator.Compute(z);
-                DebugUtils._debugData1(face);
-                var results = _discriminator.Compute(face);
-                Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
+                var results = _discriminator.Forward(target);
+                Debug.Log(DebugUtils.DoubleArray2String(target) + " -> " + DebugUtils.DoubleArray2String(results));
             }
         }
 
@@ -169,8 +174,8 @@ namespace Gan
             var inputs = new[] {MathUtils.GetRandomRange()};
             // var inputs = new[] {0.7};
             // _debugData1(inputs);
-            var results1 = _generator.Compute(inputs);
-            var results2 = _discriminator.Compute(results1);
+            var results1 = _generator.Forward(inputs);
+            var results2 = _discriminator.Forward(results1);
             if (results2.Length > 0 && results2[0] >= 0.5)
             {
                 DebugUtils._debugData2(results1);

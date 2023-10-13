@@ -37,8 +37,7 @@ namespace Gan
 
         public void UpdateWeightsFromTargets(double[] targets)
         {
-            ForwardPropagate(targets);
-            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            var predictions = Forward(targets);
             for (int i = 0; i < predictions.Length; i++)
             {
                 for (int j = 0; j < OutputLayer[i].InputSynapses.Count; j++)
@@ -49,8 +48,7 @@ namespace Gan
 
         public void UpdateWeightsFromNoises(double[] noises)
         {
-            ForwardPropagate(noises);
-            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            var predictions = Forward(noises);
             for (int i = 0; i < predictions.Length; i++)
             {
                 for (int j = 0; j < OutputLayer[i].InputSynapses.Count; j++)
