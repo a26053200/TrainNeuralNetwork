@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.monitor1394.xcharts": "file:../LocalPackages/XCharts",
     "com.unity.ide.rider": "3.0.21",
     "com.unity.render-pipelines.universal": "10.10.1",
     "com.unity.textmeshpro": "3.0.6",

@@ -51,7 +51,7 @@ namespace Gan
         //计算神经元的值
         public virtual double CalculateValue()
         {
-            var x = InputSynapses.Sum(a => a.Weight* a.InputNeuron.Value) + Bias;
+            var x = InputSynapses.Sum(a => a.Weight * a.InputNeuron.Value) + Bias;
             return Value = Sigmoid.Output(x);
         }
 
@@ -83,7 +83,7 @@ namespace Gan
             foreach (var synapse in InputSynapses)
             {
                 prevDelta = synapse.WeightDelta;
-                synapse.WeightDelta = learnRate * Gradient * synapse.InputNeuron.Value; //权重化量
+                synapse.WeightDelta = learnRate * Gradient * synapse.InputNeuron.Value; //权重变化量
                 synapse.Weight += synapse.WeightDelta + momentum * prevDelta; // 更新权重
             }
         }

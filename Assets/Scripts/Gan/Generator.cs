@@ -4,6 +4,9 @@
 // DateTime：2023年09月27日 星期三 18:00
 //		
 
+using System.Linq;
+using NeuralNetwork;
+
 namespace Gan
 {
     /// <summary>
@@ -13,40 +16,42 @@ namespace Gan
     {
         public Generator()
         {
-            //1个输入元,4个突触 到 4个输出元
-            double[][] weightss =
-            {
-                new double[] {1},
-                new double[] {-1},
-                new double[] {-1},
-                new double[] {1}
-            };
-            var inputNeuron = new Neuron()
-            {
-                Bias = 1
-            };
+            //1个输入元, 4个突触 到 4个输出元
+            var inputNeuron = new Neuron();
             InputLayer.Add(inputNeuron);
 
-            //4个输出元 每个输出有1个输入突触
-            double[] biases = {1, -1, -1, 1};
-            for (int i = 0; i < biases.Length; i++)
+            //4个输出元 每个输出有 1个输入突触
+            for (int i = 0; i < 4; i++)
             {
-                var bias = biases[i];
                 Neuron outputNeuron = new Neuron
                 {
-                    Bias = bias
+                    Bias = MathUtils.Rand()
                 };
-                var weights = weightss[i];
-                foreach (var weight in weights)
+                Synapse synapse = new Synapse(inputNeuron, outputNeuron)
                 {
-                    Synapse synapse = new Synapse(inputNeuron, outputNeuron)
-                    {
-                        Weight = weight
-                    };
-                    outputNeuron.InputSynapses.Add(synapse);
-                }
-
+                    Weight = MathUtils.Rand()
+                };
+                inputNeuron.OutputSynapses.Add(synapse);
+                outputNeuron.InputSynapses.Add(synapse);
                 OutputLayer.Add(outputNeuron);
+            }
+        }
+
+        public void Update(double[] noises, Discriminator D)
+        {
+            // var error_before = Error(noises, D);
+            ForwardPropagate(noises);
+            var x = OutputLayer.Select(a => a.Value).ToArray();
+            D.ForwardPropagate(x);
+            var y = D.OutputLayer.Select(a => a.Value).ToArray();
+            var dw = D.GetOutputWeights(0);
+            var db = D.GetOutputBiases()[0];
+            var factor = new double[dw.Length];
+            for (int i = 0; i < factor.Length; i++)
+            {
+                factor[i] = -(1 - y[0]) * dw[i] * x[i] * (1 - x[i]);
+                InputLayer[0].OutputSynapses[i].Weight -= factor[i] * noises[i] * LearningRate;
+                OutputLayer[i].Bias -= factor[i] * LearningRate;
             }
         }
     }

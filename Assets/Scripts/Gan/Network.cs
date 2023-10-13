@@ -57,7 +57,7 @@ namespace Gan
         /// 前向传播
         ///</summary>
         ///<param name="inputs"></param>
-        private void ForwardPropagate(params double[] inputs) // params关键字 -- 可变参数
+        public void ForwardPropagate(params double[] inputs) // params关键字 -- 可变参数
         {
             var i = 0;
             // 遍历输入层的神经元的值
@@ -74,7 +74,7 @@ namespace Gan
         /// 向后传播
         ///</summary>
         ///<param name="targets"></param>2个引用
-        private void BackPropagate(params double[] targets)
+        protected void BackPropagate(params double[] targets)
         {
             var i = 0;
             //从后往前，先遍历输出层
@@ -90,7 +90,6 @@ namespace Gan
         }
 
         #endregion
-
 
         #region 训练方法
 
@@ -140,12 +139,80 @@ namespace Gan
             // 循环往复
         }
 
+        public double[] GetOutputWeights(int layerIndex)
+        {
+            var weights = new double[OutputLayer[layerIndex].InputSynapses.Count];
+            for (int i = 0; i < OutputLayer[layerIndex].InputSynapses.Count; i++)
+                weights[i] = OutputLayer[layerIndex].InputSynapses[i].Weight;
+            return weights;
+        }
+
+        public double[] GetOutputBiases()
+        {
+            return GetBiases(OutputLayer);
+        }
+
+        public double[] GetInputWeights(int layerIndex)
+        {
+            var weights = new double[InputLayer[layerIndex].OutputSynapses.Count];
+            for (int i = 0; i < InputLayer[layerIndex].OutputSynapses.Count; i++)
+                weights[i] = InputLayer[layerIndex].OutputSynapses[i].Weight;
+            return weights;
+        }
+
+        public double[] GetInputBiases()
+        {
+            return GetBiases(InputLayer);
+        }
+
+        private double[] GetBiases(List<Neuron> layer)
+        {
+            var biases = new double[layer.Count];
+            for (int i = 0; i < layer.Count; i++)
+                biases[i] = layer[i].Bias;
+            return biases;
+        }
+
         #endregion
 
         public double[] Compute(double[] inputs)
         {
             ForwardPropagate(inputs);
             return OutputLayer.Select(a => a.Value).ToArray();
+        }
+
+        //ERROR
+        //从真实数据计算误差
+        public double[] CalculateErrorFromTargets(double[] targets)
+        {
+            ForwardPropagate(targets);
+            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            double[] errors = new double[predictions.Length];
+            for (int i = 0; i < predictions.Length; i++)
+                errors[i] = -Math.Log(predictions[i]);
+
+            return errors;
+        }
+
+        //从噪声数据计算误差
+        public double[] CalculateErrorFromNoises(double[] noises)
+        {
+            ForwardPropagate(noises);
+            var predictions = OutputLayer.Select(a => a.Value).ToArray();
+            double[] errors = new double[predictions.Length];
+            for (int i = 0; i < predictions.Length; i++)
+                errors[i] = -Math.Log(1 - predictions[i]);
+
+            return errors;
+        }
+
+        public double Error(double[] noises, Network D)
+        {
+            ForwardPropagate(noises);
+            var x = OutputLayer.Select(a => a.Value).ToArray();
+            D.ForwardPropagate(x);
+            var y = D.OutputLayer.Select(a => a.Value).ToArray();
+            return -Math.Log(y[0]);
         }
 
         private double CalculateError(double[] targets)
