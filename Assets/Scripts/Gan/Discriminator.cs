@@ -43,7 +43,7 @@ namespace Gan
             {
                 for (int j = 0; j < OutputLayer[i].InputSynapses.Count; j++)
                     OutputLayer[i].InputSynapses[j].Weight -= -targets[j] * (1 - predictions[i]) * LearningRate;
-                OutputLayer[i].Bias -= (1 - predictions[i]) * LearningRate;
+                OutputLayer[i].Bias -= -(1 - predictions[i]) * LearningRate;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Gan
             for (int i = 0; i < predictions.Length; i++)
             {
                 for (int j = 0; j < OutputLayer[i].InputSynapses.Count; j++)
-                    OutputLayer[i].InputSynapses[j].Weight -= -noises[j] * predictions[i];
+                    OutputLayer[i].InputSynapses[j].Weight -= noises[j] * predictions[i] * LearningRate;
                 OutputLayer[i].Bias -= predictions[i] * LearningRate;
             }
         }

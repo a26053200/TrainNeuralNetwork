@@ -143,15 +143,19 @@ namespace Gan
             var yAxis2 = _lineChartD.EnsureChartComponent<YAxis>();
             yAxis2.max = Mathf.CeilToInt((float) dMax);
 
+            Debug.Log("G weights:\t" + DebugUtils.DoubleArray2String(_generator.GetInputWeights(0)));
+            Debug.Log("G biases:\t" + DebugUtils.DoubleArray2String(_generator.GetOutputBiases()));
+            Debug.Log("D weights:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputWeights(0)));
+            Debug.Log("D biases:\t" + DebugUtils.DoubleArray2String(_discriminator.GetInputBiases()));
             //测试生成器 判别器
             var testFaces = new List<double[]>();
             for (int i = 0; i < 10; i++)
             {
                 var z = new[] {MathUtils.GetRandomRange()};
                 var face = _generator.Compute(z);
-                // DebugUtils._debugData1(face);
+                DebugUtils._debugData1(face);
                 var results = _discriminator.Compute(face);
-                Debug.Log(DebugUtils.DoubleArray2String(face) + " - " + DebugUtils.DoubleArray2String(results));
+                Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
             }
         }
 
