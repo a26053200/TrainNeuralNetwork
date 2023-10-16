@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 using XCharts.Runtime;
+using Object = UnityEngine.Object;
 
 namespace Gan
 {
@@ -27,6 +28,8 @@ namespace Gan
         public TMP_InputField sliderEpochs;
         public TMP_InputField sliderLearnRate;
         public TMP_InputField sliderSeed;
+        public Face facePrefab;
+        public GameObject faces;
 
         // private readonly List<NNDataSet> _dataSets = new List<NNDataSet>();
         private float _startTime;
@@ -35,6 +38,7 @@ namespace Gan
         private float _learningRate = 0.001f;
         private int _epochs = 1000; //train times
         private int _seed = 42; //train times
+        private List<GameObject> _lastFaces = new List<GameObject>();
 
         private void Awake()
         {
@@ -123,7 +127,7 @@ namespace Gan
                     //从假脸更新生成器权重
                     _generator.Update(noiseFace, _discriminator);
 
-                    _lineChartG.AddXAxisData("" + index++);
+                    _lineChartG.AddXAxisData("" + index);
                     _lineChartD.AddXAxisData("" + index++);
 
                     if (gMax < gError)
@@ -153,12 +157,21 @@ namespace Gan
             Debug.Log("D weights:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputWeights(0)));
             Debug.Log("D biases:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputBiases()));
             // 测试生成器 判别器
+
+            for (int i = 0; i < _lastFaces.Count; i++)
+                Destroy(_lastFaces[i]);
+            _lastFaces.Clear();
             for (int i = 0; i < 10; i++)
             {
                 var z = new[] {MathUtils.GetRandomRange()};
                 var face = _generator.Forward(z);
                 var results = _discriminator.Forward(face);
                 Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
+                var faceObj = Object.Instantiate(facePrefab.gameObject, faces.transform, true);
+                faceObj.transform.localScale = Vector3.one;
+                var newFace = faceObj.GetComponent<Face>();
+                newFace.SetFace(face, results[0]);
+                _lastFaces.Add(faceObj);
             }
 
             // // 测试判别器
