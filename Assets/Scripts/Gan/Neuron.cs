@@ -59,7 +59,7 @@ namespace Gan
         public double CalculateGradient(double? target = null) // ? 在这里是可空类型修饰符，使值类型也能为空
         {
             if (target == null)
-                return Gradient = SumOutput() * Sigmoid.Derivate(Value);
+                return Gradient = OutputSynapses.Sum(a => a.OutputNeuron.Gradient * a.Weight) * Sigmoid.Derivate(Value);
             return CalculateError(target.Value) * Sigmoid.Derivate(Value);
         }
 
@@ -86,28 +86,6 @@ namespace Gan
                 synapse.WeightDelta = learnRate * Gradient * synapse.InputNeuron.Value; //权重变化量
                 synapse.Weight += synapse.WeightDelta + momentum * prevDelta; // 更新权重
             }
-        }
-
-        private double SumInput()
-        {
-            double sum = 0;
-            foreach (var s in InputSynapses)
-            {
-                sum += s.InputNeuron.Value * s.Weight;
-            }
-
-            return sum;
-        }
-
-        private double SumOutput()
-        {
-            double sum = 0;
-            foreach (var s in OutputSynapses)
-            {
-                sum += s.OutputNeuron.Gradient * s.Weight;
-            }
-
-            return sum;
         }
     }
 }

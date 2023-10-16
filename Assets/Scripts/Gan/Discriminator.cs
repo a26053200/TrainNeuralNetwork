@@ -16,10 +16,15 @@ namespace Gan
     {
         public Discriminator() : base()
         {
+            // var weights = new double[] {0.60175083, -0.29127513, -0.40093314, 0.37759987};
+            // var bias = -0.8955103005797729;
+            var weights = new double[] {1, -1, -1, 1};
+            var bias = -1;
             //4个输入元,每个元 1个突触 到 同 1个输出
             var outputNeuron = new Neuron()
             {
                 Bias = MathUtils.Rand()
+                // Bias = bias
             };
             OutputLayer.Add(outputNeuron);
             for (int i = 0; i < 4; i++)
@@ -28,6 +33,7 @@ namespace Gan
                 Synapse synapse = new Synapse(inputNeuron, outputNeuron)
                 {
                     Weight = MathUtils.Rand()
+                    // Weight = weights[i]
                 };
                 InputLayer.Add(inputNeuron);
                 inputNeuron.OutputSynapses.Add(synapse);

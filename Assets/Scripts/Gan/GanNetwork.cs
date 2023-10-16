@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NeuralNetwork;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -23,8 +24,9 @@ namespace Gan
         public LineChart _lineChartG;
         public LineChart _lineChartD;
         public Button btnTrain;
-        public Slider sliderEpochs;
-        public Slider sliderLearnRate;
+        public TMP_InputField sliderEpochs;
+        public TMP_InputField sliderLearnRate;
+        public TMP_InputField sliderSeed;
 
         // private readonly List<NNDataSet> _dataSets = new List<NNDataSet>();
         private float _startTime;
@@ -32,6 +34,7 @@ namespace Gan
         private Generator _generator;
         private float _learningRate = 0.001f;
         private int _epochs = 1000; //train times
+        private int _seed = 42; //train times
 
         private void Awake()
         {
@@ -65,8 +68,10 @@ namespace Gan
 
         private void StartTest()
         {
-            _epochs = (int) sliderEpochs.value;
-            _learningRate = sliderLearnRate.value;
+            _epochs = int.Parse(sliderEpochs.text);
+            _learningRate = float.Parse(sliderLearnRate.text);
+            _seed = int.Parse(sliderSeed.text);
+            MathUtils.SetRandomSeed(_seed);
 
             _lineChartG.ClearData();
             _lineChartD.ClearData();
@@ -147,21 +152,21 @@ namespace Gan
             Debug.Log("G biases:\t" + DebugUtils.DoubleArray2String(_generator.GetOutputBiases()));
             Debug.Log("D weights:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputWeights(0)));
             Debug.Log("D biases:\t" + DebugUtils.DoubleArray2String(_discriminator.GetOutputBiases()));
-            //测试生成器 判别器
-            // for (int i = 0; i < 10; i++)
-            // {
-            //     var z = new[] {MathUtils.GetRandomRange()};
-            //     var face = _generator.Forward(z);
-            //     var results = _discriminator.Forward(face);
-            //     Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
-            // }
-            
-            //测试判别器
-            foreach (var target in targetList)
+            // 测试生成器 判别器
+            for (int i = 0; i < 10; i++)
             {
-                var results = _discriminator.Forward(target);
-                Debug.Log(DebugUtils.DoubleArray2String(target) + " -> " + DebugUtils.DoubleArray2String(results));
+                var z = new[] {MathUtils.GetRandomRange()};
+                var face = _generator.Forward(z);
+                var results = _discriminator.Forward(face);
+                Debug.Log(DebugUtils.DoubleArray2String(face) + " -> " + DebugUtils.DoubleArray2String(results));
             }
+
+            // // 测试判别器
+            // foreach (var target in targetList)
+            // {
+            //     var results = _discriminator.Forward(target);
+            //     Debug.Log(DebugUtils.DoubleArray2String(target) + " -> " + DebugUtils.DoubleArray2String(results));
+            // }
         }
 
         private void Update1()
